@@ -236,16 +236,26 @@ a:focus-visible {
     font-size: 14px;
     padding: 0;
     align-items: flex-start;
+    /* Use dynamic viewport height for mobile browsers */
+    min-height: 100dvh;
   }
 
   .terminal-window {
     border-radius: 0;
-    min-height: 100vh;
+    /* Use dynamic viewport height that accounts for mobile browser UI */
+    min-height: 100dvh;
+    height: 100dvh;
     max-width: 100%;
+    /* Add safe area padding for notched/rounded screens */
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   .terminal-header {
     padding: 0.5rem 0.75rem;
+    /* Safe area for notches/camera cutouts */
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
   }
 
   .terminal-title {
@@ -254,15 +264,31 @@ a:focus-visible {
 
   .terminal-content {
     padding: 1rem;
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    /* Ensure content doesn't get cut off at bottom */
+    padding-bottom: max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem));
   }
 
   .terminal-footer {
     font-size: 11px;
     padding: 0.4rem 0.75rem;
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+    /* Keep footer above rounded screen edges */
+    padding-bottom: max(0.4rem, calc(env(safe-area-inset-bottom) + 0.25rem));
   }
 
   :root {
     --indent-size: 1.5ch;
+  }
+  
+  /* Fallback for browsers that don't support dvh */
+  @supports not (height: 100dvh) {
+    .terminal-window {
+      min-height: 100vh;
+      height: 100vh;
+    }
   }
 }
 
@@ -282,12 +308,22 @@ a:focus-visible {
 
   .terminal-content {
     padding: 0.75rem;
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+    /* Slightly reduce bottom padding on very small screens */
+    padding-bottom: max(0.75rem, calc(env(safe-area-inset-bottom) + 0.25rem));
   }
 
   .terminal-footer {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.25rem;
+    font-size: 10px;
+    padding: 0.35rem 0.75rem;
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+    /* Ensure footer text stays above rounded corners */
+    padding-bottom: max(0.35rem, calc(env(safe-area-inset-bottom) + 0.25rem));
   }
 
   .line {
