@@ -1,0 +1,20 @@
+name = "kostiskarampinas-ask"
+main = "index.js"
+compatibility_date = "2026-10-20"
+
+[ai]
+binding = "AI"
+
+[[ratelimits]]
+name = "LIMITER"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 5
+  period = 60
+
+# content.js is bundled as plain text and becomes the model's only knowledge
+[[rules]]
+type = "Text"
+globs = ["**/content.js"]
+fallthrough = false
