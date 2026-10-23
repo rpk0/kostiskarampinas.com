@@ -10,7 +10,7 @@ name = "LIMITER"
 namespace_id = "1001"
 
   [ratelimits.simple]
-  limit = 5
+  limit = 10
   period = 60
 
 # content.js is bundled as plain text and becomes the model's only knowledge
