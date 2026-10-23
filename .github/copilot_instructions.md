@@ -15,6 +15,17 @@
 - Footer displays vim-style stats: `me.rb [+] XL, YC` where X=lines, Y=characters.
 - When updating content, remember to update the footer stats to match actual line/char count.
 
+## Beta homepage (`/new/`)
+- A different design: one lowercase tagline and one input; answers carry the CV and links.
+- All copy lives in `new/js/content.js`; `new/js/site.js` is behaviour only.
+- The page is `noindex, nofollow` until it replaces the root page.
+- Sizes are in `rem`: 16px up to 1920px wide, scaling up on larger screens.
+- Unmatched questions go to the Cloudflare Worker in `worker/` (Workers AI). It is grounded
+  only on `new/js/content.js`; redeploy it with `cd worker && npx wrangler deploy` after
+  editing that file.
+- Never put internal or unannounced company details in `content.js`: it is public and is
+  the model's only knowledge.
+
 ## Development Guidelines
 - Keep changes minimal and focused.
 - Maintain the code editor aesthetic across all screen sizes.
