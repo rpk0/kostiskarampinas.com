@@ -5,7 +5,6 @@
   const QA = SITE.qa;
   const GROUPS = SITE.groups;
   const ROTATE_MS = SITE.rotateMs || 2800;
-  const AUTOPILOT = false; // the self-running sweep on phones; off now that the words rotate
   const SHOWN = SITE.shown;
   const EGGS = SITE.eggs;
   const KEYS = SITE.keys;
@@ -38,6 +37,9 @@
   h1.setAttribute('aria-label', TAGLINE);
   h1.textContent = '';
   const chars = [];
+  const DIM = 0.6; // opacity of the words not in focus; matches .tag .c in site.css
+  const TINT = 0.3; // how much of the dot's colour the word in focus takes on
+  const SETTLED = 0.85; // opacity of the whole line once every word group has had its turn
   TAGLINE.split(' ').forEach((word, wi, arr) => {
     const g = GROUPS.findIndex((grp) => grp.includes(word));
     const w = document.createElement('span');
@@ -48,7 +50,7 @@
       c.className = 'c';
       c.textContent = ch;
       w.appendChild(c);
-      chars.push({ el: c, x: 0, y: 0, cur: 260, written: 260, g, e: 0 });
+      chars.push({ el: c, x: 0, y: 0, cur: 260, written: 260, g, e: 0, op: DIM, tint: 0, pk: 0 });
     }
     h1.appendChild(w);
     if (wi < arr.length - 1) h1.appendChild(document.createTextNode(' '));
@@ -59,7 +61,7 @@
   const dot = chars[N - 1].el;
   dot.classList.add('dot');
 
-  let rest = 260, restEm = 560, peak = 820, fs = 80, lines = [];
+  let rest = 260, restEm = 560, peak = 820, fs = 80;
   function readTokens() {
     const cs = getComputedStyle(root);
     rest = parseFloat(cs.getPropertyValue('--rest')) || 260;
@@ -78,20 +80,13 @@
       c.w = r.width;
     }
     for (const c of chars) c.el.style.width = c.w + 'px';
-    const ys = [];
-    for (const c of chars) {
-      const l = ys.find((L) => Math.abs(L.y - c.y) < fs * 0.3);
-      if (l) { l.min = Math.min(l.min, c.x); l.max = Math.max(l.max, c.x); }
-      else ys.push({ y: c.y, min: c.x, max: c.x });
-    }
-    lines = ys.sort((a, b) => a.y - b.y);
   }
   let rT;
   addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(measure, 120); });
   measure();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
 
-  // ---------- Pointer, touch and autopilot ----------
+  // ---------- Pointer and touch ----------
   const ptr = { x: 0, y: 0, active: false, last: -1e9 };
   const sp = { x: null, y: null };
   let inf = 0;
@@ -108,42 +103,22 @@
   addEventListener('touchstart', onTouch, { passive: true });
   addEventListener('touchmove', onTouch, { passive: true });
 
-  const ap = { line: 0, x: -200, pause: 0 };
-  function autopilot(dt) {
-    if (!lines.length) return null;
-    const R = fs * 2.2;
-    if (ap.pause > 0) { ap.pause -= dt; return null; }
-    const L = lines[ap.line % lines.length];
-    ap.x += (dt / 1000) * Math.max(260, (L.max - L.min) / 2.4);
-    if (ap.x > L.max + R) {
-      ap.line = (ap.line + 1) % lines.length;
-      ap.x = lines[ap.line].min - R;
-      if (ap.line === 0) ap.pause = 1400;
-    }
-    return { x: ap.x, y: L.y };
-  }
-
   // ---------- Focus / theme wave ----------
   let waveT0 = null;
-  let active = 0, rotT = performance.now();
+  // One pass through the groups, then the line settles: brighter, with every word that had its turn kept pink
+  let active = 0, rotT = performance.now(), settled = false, dimNow = DIM;
   const wave = () => { if (!reduce) waveT0 = performance.now(); };
 
-  let lastT = performance.now();
   // Each weight change re-lays out the line, so the ambient rotation writes at half rate and the loop sleeps off-screen
   let odd = false, tagSeen = true;
   new IntersectionObserver(([e]) => { tagSeen = e.isIntersecting; }).observe(h1);
   function frame(now) {
-    const dt = Math.min(50, now - lastT); lastT = now;
     odd = !odd;
     if (!reduce && tagSeen) {
       const hb = h1.getBoundingClientRect();
       let tx = null, ty = null, want = 0;
       const recent = now - ptr.last < IDLE;
       if (ptr.active && recent) { tx = ptr.x - hb.left; ty = ptr.y - hb.top; want = 1; }
-      else if (AUTOPILOT && touchUI && !ask.classList.contains('is-focus') && now - ptr.last > IDLE) {
-        const p = autopilot(dt);
-        if (p) { tx = p.x; ty = p.y; want = 1; }
-      }
       if (tx !== null) {
         if (sp.x === null || inf < 0.02) { sp.x = tx; sp.y = ty; }
         else { sp.x += (tx - sp.x) * 0.22; sp.y += (ty - sp.y) * 0.22; }
@@ -151,8 +126,11 @@
       inf += (want - inf) * (want ? 0.12 : 0.05);
 
       const holding = ptr.active && recent;
-      if (now - rotT > ROTATE_MS && !holding && waveT0 === null) { active = (active + 1) % GROUPS.length; rotT = now; }
-      else if (holding) rotT = now - ROTATE_MS + 900;
+      if (!settled && now - rotT > ROTATE_MS && waveT0 === null) {
+        active++; rotT = now;
+        if (active === GROUPS.length) { settled = true; active = -2; } // -2: no group (-1 marks words outside any group)
+      }
+      dimNow += ((settled ? SETTLED : DIM) - dimNow) * 0.03;
 
       const R = fs * 2.3;
       let wf = -1;
@@ -177,6 +155,13 @@
         const target = base + (peak - base) * b;
         c.cur += (target - c.cur) * 0.2;
         if ((holding ? Math.abs(c.cur - c.written) > 0.6 : odd && Math.abs(c.cur - c.written) > 2)) { c.written = c.cur; c.el.style.fontWeight = Math.round(c.cur); }
+        // Words not in focus sit slightly faded, so the heavy ones read even stronger; the dot stays at full colour
+        const op = i === N - 1 ? 1 : dimNow + (1 - dimNow) * Math.max(c.e, b);
+        if (Math.abs(op - c.op) > 0.02) { c.op = op; c.el.style.opacity = op.toFixed(2); }
+        // ...and the word in focus picks up a little of the dot's colour, and keeps it
+        c.pk = Math.max(c.pk, c.e);
+        const tint = i === N - 1 ? 0 : Math.round(c.pk * TINT * 100);
+        if (tint !== c.tint) { c.tint = tint; c.el.style.color = tint ? 'color-mix(in oklab, var(--fg), var(--signal) ' + tint + '%)' : ''; }
       }
     }
     requestAnimationFrame(frame);
@@ -184,6 +169,7 @@
   requestAnimationFrame(frame);
 
   // ---------- Ask ----------
+  let sugsOpen = false;
   let mode = 'idle', cur = null, typer = null, sugKey = '', aiSeq = 0, aiAnswer = false, asks = 0;
 
   // ---------- Instrument: scale, marker, knob, readout ----------
@@ -192,8 +178,7 @@
   const scaleEl = document.getElementById('scale');
   const mark = document.getElementById('mark');
   const ctx = document.createElement('canvas').getContext('2d');
-  let ticks = [], tickX = [], spins = 0, busy = false;
-  const pad = (n) => String(Math.min(999, n)).padStart(3, '0');
+  let ticks = [], tickX = [], busy = false;
   // 50-character limit, enforced with a bit of attitude
   const MAX = 50;
   const fmt = (n) => String(n).padStart(2, '0') + '/' + MAX;
@@ -265,16 +250,18 @@
     if (!item || (!item.cv && !item.links)) { extraEl.hidden = true; return; }
     let i = 0;
     const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+    // **text** in a note is the part worth noticing; built as nodes, never as HTML
+    const note = (text) => { const n = el('span', 'note'); text.split(/\*\*(.+?)\*\*/).forEach((part, i) => n.append(i % 2 ? el('b', null, part) : part)); return n; };
     if (item.cv) {
       const ol = el('ol', 'cv');
       for (const r of item.cv) {
         const li = el('li', r.to === 'now' ? 'current' : '');
         li.style.setProperty('--i', i++);
-        const when = el('span', 'when', r.from + ' — ');
+        const when = el('span', 'when', r.from + ' – ');
         when.append(r.to === 'now' ? el('b', '', 'now') : r.to);
         const what = el('span', 'what');
         what.append(el('span', 'role', r.role), el('span', 'org', r.org));
-        if (r.note) what.append(el('span', 'note', r.note));
+        if (r.note) what.append(note(r.note));
         li.append(when, what);
         ol.append(li);
       }
@@ -304,7 +291,7 @@
           a.append(el('span', 'lbl', l.label), el('span', 'host', l.host), el('span', 'arr', '↗'));
           li.append(a);
         }
-        if (l.note) li.append(el('span', 'note', l.note));
+        if (l.note) li.append(note(l.note));
         ul.append(li);
       }
       extraEl.append(ul);
@@ -345,22 +332,25 @@
     });
   }
   ['input', 'keyup', 'click', 'select', 'scroll'].forEach((ev) => input.addEventListener(ev, () => { track(); refreshStatus(); }));
-  addEventListener('resize', () => setTimeout(buildScale, 140));
+  let sT;
+  addEventListener('resize', () => { clearTimeout(sT); sT = setTimeout(buildScale, 140); });
   buildScale();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(buildScale);
-  function setSugs(ids, lbl) {
-    const key = ids.join(',') + '|' + lbl;
+  // A suggestion is an answer id, or { id, q } to ask it in other words
+  function setSugs(sugs, lbl) {
+    const key = sugs.map((s) => s.q || s).join(',') + '|' + lbl;
     if (key === sugKey) return;
     sugKey = key;
     sugsEl.textContent = '';
-    ids.forEach((id, i) => {
-      const item = QA.find((x) => x.id === id);
+    sugs.forEach((s, i) => {
+      const id = s.id || s;
+      const q = s.q || QA.find((x) => x.id === id).q;
       const b = document.createElement('button');
       b.type = 'button';
-      b.textContent = item.q;
+      b.textContent = q;
       b.style.setProperty('--i', i);
       b.addEventListener('mousedown', (e) => e.preventDefault());
-      b.addEventListener('click', () => askQ(item.q, id));
+      b.addEventListener('click', () => askQ(q, id));
       sugsEl.appendChild(b);
     });
     label.textContent = lbl;
@@ -368,11 +358,13 @@
   }
   function render() {
     const focused = ask.classList.contains('is-focus');
-    const show = mode !== 'idle' || focused;
+    const show = mode !== 'idle' || focused || sugsOpen;
     if (!show) { sugsEl.hidden = true; label.hidden = true; sugKey = ''; }
     else {
-      if (mode === 'answer') setSugs(QA.filter((x) => SHOWN.includes(x.id) && x.id !== cur).slice(0, 3).map((x) => x.id), 'Ask another');
-      else if (mode === 'fallback') setSugs(SHOWN, '');
+      if (mode === 'answer') {
+        const path = SITE.paths.find((p) => p.ids.includes(cur));
+        setSugs(path ? [...path.ids.filter((id) => id !== cur), path.exit] : SHOWN.filter((id) => id !== cur), 'Ask another');
+      }
       else setSugs(SHOWN, '');
       sugsEl.hidden = mode === 'limit';
     }
@@ -413,7 +405,7 @@
     };
     if (!hit && AI_URL) {
       busy = true; ask.classList.add('busy');
-      fetch(AI_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ q: text }), signal: AbortSignal.timeout(9000) })
+      fetch(AI_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ q: text }), signal: AbortSignal.timeout ? AbortSignal.timeout(9000) : undefined })
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => d && d.a, () => null)
         .then((a) => {
@@ -569,7 +561,16 @@
     await wait(700);
     const home = mode !== 'idle' ? 'answer' : 'ruler';
     await travel(home);
-    if (home === 'ruler' && !touchUI && mode === 'idle' && document.activeElement !== input) input.focus({ preventScroll: true });
+    if (home === 'ruler' && mode === 'idle') {
+      // Phones skip focus (it would pop the keyboard), so open the suggestions directly instead
+      if (!touchUI && document.activeElement !== input) input.focus({ preventScroll: true });
+      else if (touchUI) { sugsOpen = true; render(); }
+      // On small screens the suggestions sit below the fold: bring them up, without pushing the input out of view
+      if (innerWidth <= 640) requestAnimationFrame(() => {
+        const over = Math.min(sugsEl.getBoundingClientRect().bottom + 24 - innerHeight, ask.getBoundingClientRect().top - 16);
+        if (over > 0) scrollBy({ top: over, behavior: 'smooth' });
+      });
+    }
   }
   async function petDeliver() {
     if (!petAlive) spawn();
@@ -626,7 +627,7 @@
   dot.addEventListener('click', () => { if (!petAlive && !reduce) dropP = drop(); });
 
   // It falls out on its own once, after roughly the time it takes to read the tagline
-  const READ_MS = Math.round((TAGLINE.split(' ').length / 3.8) * 1000 + 1200); // ~230 words a minute, plus a beat
+  const READ_MS = Math.round((TAGLINE.split(' ').length / 4.5) * 1000 + 600); // a brisk read (~270 words a minute), plus a beat
   let autoT = null;
   const armDrop = () => {
     clearTimeout(autoT);
