@@ -55,6 +55,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--font); -webki
 }
 .tag .w { display: inline-block; white-space: nowrap; }
 .tag .c { display: inline-block; text-align: center; }
+@media (prefers-reduced-motion: no-preference) { .tag .c { opacity: .6; } }
 /* the one bright thing on the page: the final full stop */
 .tag .dot { color: var(--signal); cursor: pointer; }
 /* once there is an answer, the tagline steps back so the answer leads; hovering brings it back */
@@ -122,6 +123,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--font); -webki
 .cv .current .role { font-weight: 650; }
 .cv .org { font-size: 1.0625rem; color: var(--muted); }
 .extra .note { flex-basis: 100%; display: block; font-size: 0.875rem; color: var(--muted); margin-top: 0.125rem; }
+.extra .note b { font-weight: inherit; color: color-mix(in srgb, var(--fg) 60%, var(--muted)); }
 .links .link { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: baseline; gap: 1rem; color: var(--fg); text-decoration: none; }
 .links .lbl { font-size: 1.375rem; font-weight: 500; letter-spacing: -0.02em; }
 .links .host { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); overflow-wrap: anywhere; }
