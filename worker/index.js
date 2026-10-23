@@ -39,7 +39,7 @@ export default {
         max_tokens: 120
       });
       // The prompt asks for two sentences; small models don't always listen, so enforce it
-      const text = String(r.response || '').trim();
+      const text = String(r.response || '').replace(/\*\*/g, '').trim();
       const a = (text.match(/[\s\S]*?[.!?](?=\s+[A-Z]|\s*$)/g) || [text]).slice(0, 2).join('').trim();
       // Off-topic gets no model text; the page shows its own "outside what I can answer" reply
       if (/\bOUTSIDE\b/.test(text)) return json({ a: null });
