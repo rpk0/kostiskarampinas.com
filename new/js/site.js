@@ -496,7 +496,7 @@
   document.body.append(pet, zz);
 
   let petAlive = false, petBusy = false, dropP = null, wantAnswer = false;
-  const P = { x: 0, y: 0, s: 12, mode: null, tw: null, fx: null, sleep: false, think: false };
+  const P = { x: 0, y: 0, s: 12, mode: null, tw: null, fx: null, sleep: false, think: false, anim: false };
   const EASE = { lin: (t) => t, in: (t) => t * t, out: (t) => 1 - (1 - t) * (1 - t) };
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -550,27 +550,57 @@
     const r = dot.getBoundingClientRect();
     P.x = r.left + scrollX + r.width / 2;
     P.y = r.top + scrollY + r.height * 0.78 - P.s / 2;
+    pet.style.transform = pose(P.x, P.y, 1, 1);
     dot.style.visibility = 'hidden';
     root.classList.add('pet-alive');
     pet.hidden = false;
     petAlive = true;
   }
+  // Scale squashes towards the bottom edge, so it stays on whatever it sits on
+  const pose = (x, y, sx, sy) => 'translate(' + x.toFixed(1) + 'px,' + (y + (P.s / 2) * (1 - sy)).toFixed(1) + 'px) scale(' + sx.toFixed(3) + ',' + sy.toFixed(3) + ')';
+  // The whole drop is worked out up front and handed to the compositor, so a busy main thread can't stutter it:
+  // fall, two bounces, a beat, then one arc onto the ruler (or the answer, if you already asked)
   async function drop() {
     spawn(); petBusy = true; P.mode = null;
-    const floor = scrollY + innerHeight - 22 - P.s / 2;
-    const d = Math.max(40, floor - P.y);
-    await tween(P.x, floor, Math.min(950, Math.sqrt(d) * 32), 'in');
-    petFx('squash', 200, 1.1);
-    const h = Math.min(150, d * 0.24);
-    for (const k of [1, 0.32]) {
-      const t = Math.sqrt(h * k) * 30;
-      await tween(P.x, floor - h * k, t, 'out');
-      await tween(P.x, floor, t, 'in');
-      petFx('squash', 180, 0.4 + 0.6 * k);
+    const x0 = P.x, y0 = P.y, floor = scrollY + innerHeight - 22 - P.s / 2;
+    const d = Math.max(40, floor - y0), h = Math.min(150, d * 0.24);
+    const home = wantAnswer || mode !== 'idle' ? 'answer' : 'ruler';
+    const a = anchorFor(home);
+    const arc = Math.min(220, Math.max(60, Math.hypot(a.x - x0, a.y - floor) * 0.3));
+    // One gravity for every part, so the fall and the bounces feel like the same body
+    const G = 0.004; // px/ms²
+    // A ballistic hop from a to b peaking at apex: its duration, and its pose over t (0..1), stretched with its speed
+    const fly = (xa, ya, xb, yb, apex) => {
+      const vy = Math.sqrt(2 * G * (ya - apex)), T = (vy + Math.sqrt(2 * G * (yb - apex))) / G;
+      return [T, (t) => { const ms = t * T, st = Math.min(0.22, Math.abs(G * ms - vy) * 0.13); return [xa + (xb - xa) * t, ya - vy * ms + (G * ms * ms) / 2, 1 - st * 0.6, 1 + st]; }];
+    };
+    // Squash on landing, harder the faster it came down
+    const land = (x, y, fell) => { const p = Math.min(1.2, Math.sqrt(2 * G * fell) * 0.65); return [100 + 60 * p, (t) => { const k = Math.sin(Math.PI * t) * 0.38 * p; return [x, y, 1 + k, 1 - k]; }]; };
+    const pop = P.s * 2.5, top = Math.min(floor, a.y) - arc;
+    const segs = [
+      [90, (t) => { const k = Math.sin(Math.PI * t) * 0.17; return [x0, y0, 1 + k, 1 - k]; }], // a crouch, then it hops out of the sentence
+      fly(x0, y0, x0, floor, y0 - pop),
+      land(x0, floor, d + pop),
+      fly(x0, floor, x0, floor, floor - h),
+      land(x0, floor, h),
+      fly(x0, floor, x0, floor, floor - h * 0.32),
+      land(x0, floor, h * 0.32),
+      [220, () => [x0, floor, 1, 1]],
+      [140, (t) => { const k = Math.sin(Math.PI * t) * 0.27; return [x0, floor, 1 + k, 1 - k]; }],
+      fly(x0, floor, a.x, a.y, top),
+      land(a.x, a.y, a.y - top)
+    ];
+    const total = segs.reduce((n, sg) => n + sg[0], 0), frames = [];
+    let t0 = 0;
+    for (const [dur, f] of segs) {
+      for (let ms = 0; ms < dur; ms += 1000 / 120) { const [x, y, sx, sy] = f(ms / dur); frames.push({ offset: (t0 + ms) / total, transform: pose(x, y, sx, sy) }); }
+      t0 += dur;
     }
-    await wait(700);
-    const home = mode !== 'idle' ? 'answer' : 'ruler';
-    await travel(home);
+    frames.push({ offset: 1, transform: pose(a.x, a.y, 1, 1) });
+    P.x = a.x; P.y = a.y; P.anim = true;
+    await pet.animate(frames, { duration: total }).finished.catch(() => {});
+    P.anim = false;
+    P.mode = wantAnswer || mode !== 'idle' ? 'answer' : 'ruler'; petBusy = false;
     if (home === 'ruler' && mode === 'idle') {
       // Phones skip focus (it would pop the keyboard), so open the suggestions directly instead
       if (!touchUI && document.activeElement !== input) input.focus({ preventScroll: true });
@@ -595,7 +625,7 @@
     else petFx('squash', 260, 0.8);
   }
   function petFrame(now) {
-    if (petAlive) {
+    if (petAlive && !P.anim) {
       let sx = 1, sy = 1, ox = 0, oy = 0;
       if (P.tw) {
         const w = P.tw, t = Math.min(1, (now - w.t0) / w.dur), k = w.e(t);
@@ -624,8 +654,7 @@
         else if (f.kind === 'happy') { oy = -Math.abs(Math.sin(t * Math.PI * 2)) * P.s * 1.8; }
         else if (f.kind === 'squint') { const a = t < 0.12 ? t / 0.12 : t > 0.7 ? (1 - t) / 0.3 : 1; sx *= 1 + 0.32 * a; sy *= 1 - 0.55 * a; ox = t < 0.7 ? Math.sin(t * 60) * 0.6 * a : 0; }
       }
-      const y = P.y + oy + (P.s / 2) * (1 - sy);
-      pet.style.transform = 'translate(' + (P.x + ox).toFixed(1) + 'px,' + y.toFixed(1) + 'px) scale(' + sx.toFixed(3) + ',' + sy.toFixed(3) + ')';
+      pet.style.transform = pose(P.x + ox, P.y + oy, sx, sy);
       if (P.sleep) zz.style.transform = 'translate(' + (P.x + P.s * 0.5).toFixed(1) + 'px,' + (P.y - P.s * 2.2).toFixed(1) + 'px)';
     }
     requestAnimationFrame(petFrame);
