@@ -15,6 +15,9 @@
   the model's only knowledge.
 - Keep the `<noscript>` bio, the JSON-LD and the meta descriptions in line with `content.js`.
 - `og.png` (1200x630) is the share image; regenerate it if the tagline changes.
+- Cloudflare tells browsers to cache CSS/JS for 4 hours (HTML for 10 minutes). After changing
+  `css/` or `js/`, bump the `?v=` date on their links in `index.html` (and `old/index.html`),
+  or visitors get new HTML with stale assets.
 - No third-party assets: fonts live in `fonts/` (declared at the top of each stylesheet),
   icons are the magenta dot (`favicon.svg`, `favicon-48.png`, `favicon.ico`,
   `apple-touch-icon.png`), and `profile.png` is the photo with the dot.
