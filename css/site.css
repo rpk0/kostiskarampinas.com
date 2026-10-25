@@ -118,6 +118,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--font); -webki
 .tag { transition: opacity .9s cubic-bezier(.2,.7,0,1); }
 .col.has-answer .tag { opacity: .2; }
 .col.has-answer .tag:hover { opacity: 1; }
+@media (hover: none) { .col.has-answer.at-top .tag { opacity: 1; } }
 
 .ask { max-width: 62.5rem; display: flex; flex-direction: column; gap: 1.625rem; }
 /* ---- the instrument ---- */

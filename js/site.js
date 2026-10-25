@@ -385,6 +385,10 @@
     out.hidden = mode === 'idle';
     h1.parentElement.classList.toggle('has-answer', mode !== 'idle');
   }
+  // Phones have no hover to bring the tagline back, so scrolling to the top does it
+  const atTop = () => h1.parentElement.classList.toggle('at-top', scrollY < 40);
+  addEventListener('scroll', atTop, { passive: true });
+  atTop();
   function askQ(text, forceId) {
     text = (text || '').trim();
     if (!text) { input.focus(); return; }
