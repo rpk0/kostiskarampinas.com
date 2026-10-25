@@ -159,6 +159,9 @@ body { background: var(--bg); color: var(--fg); font-family: var(--font); -webki
 @keyframes zz { 0% { opacity: 0; transform: translate(0, 0.25rem); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(0.625rem, -1rem); } }
 
 .label { margin: 0; font-size: 0.8125rem; color: var(--muted); }
+/* without JS: a plain bio in place of the instrument */
+.nojs { max-width: 40rem; font-size: 1.125rem; line-height: 1.5; color: var(--muted); }
+.nojs a { color: var(--fg); }
 .sugs { display: flex; flex-wrap: wrap; gap: 0 1.75rem; }
 .sugs button {
   min-height: 2.75rem; padding: 0; border: 0; background: transparent; color: var(--muted);

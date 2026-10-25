@@ -3,32 +3,43 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Kostis Karampinas - Engineering Lead</title>
+    <title>Kostis Karampinas - Engineering Lead at Skroutz</title>
     <meta name="author" content="Kostis Karampinas">
-    <!-- Beta: kept out of search until it replaces the homepage -->
-    <meta name="robots" content="noindex, nofollow">
-    <meta name="description" content="Kostis Karampinas: tech leader who still builds, artist at heart. Engineering Lead at Skroutz, leading International across Cyprus, Romania and Bulgaria. Film photography and monobloc on the side.">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="description" content="Tech leader who still builds, artist at heart. Engineering Lead at Skroutz, leading International across Cyprus, Romania and Bulgaria.">
     <meta name="keywords" content="Kostis Karampinas, Engineering Lead, Tech Lead, Software Engineer, AI-first engineering, Cross-border e-commerce, Film Photography, Skroutz, Greece">
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF">
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0B0B0A">
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://kostiskarampinas.com/new/">
-    <meta property="og:title" content="Kostis Karampinas - Engineering Lead">
+    <meta property="og:type" content="profile">
+    <meta property="og:url" content="https://kostiskarampinas.com/">
+    <meta property="og:title" content="Kostis Karampinas - Engineering Lead at Skroutz">
     <meta property="og:description" content="Tech leader who still builds, artist at heart. Ask me anything.">
-    <meta property="og:image" content="https://s.gravatar.com/avatar/8bc43bee9040db6434f0842501858358?s=400">
+    <meta property="og:image" content="https://kostiskarampinas.com/og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:alt" content="Kostis Karampinas: tech leader who still builds, artist at heart, ending in a magenta dot">
     <meta property="og:site_name" content="Kostis Karampinas">
+    <meta property="og:locale" content="en_US">
+    <meta property="profile:first_name" content="Kostis">
+    <meta property="profile:last_name" content="Karampinas">
 
     <!-- Twitter -->
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:url" content="https://kostiskarampinas.com/new/">
-    <meta name="twitter:title" content="Kostis Karampinas - Engineering Lead">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://kostiskarampinas.com/">
+    <meta name="twitter:title" content="Kostis Karampinas - Engineering Lead at Skroutz">
     <meta name="twitter:description" content="Tech leader who still builds, artist at heart. Ask me anything.">
-    <meta name="twitter:image" content="https://s.gravatar.com/avatar/8bc43bee9040db6434f0842501858358?s=400">
+    <meta name="twitter:image" content="https://kostiskarampinas.com/og.png">
+    <meta name="twitter:image:alt" content="Kostis Karampinas: tech leader who still builds, artist at heart, ending in a magenta dot">
     <meta name="twitter:creator" content="@rpk0_">
 
-    <link rel="canonical" href="https://kostiskarampinas.com/new/">
+    <link rel="canonical" href="https://kostiskarampinas.com/">
+    <link rel="me" href="https://github.com/rpk0">
+    <link rel="me" href="https://linkedin.com/in/kostis-karampinas">
+    <link rel="me" href="https://x.com/rpk0_">
+    <link rel="me" href="https://www.instagram.com/rpk.io/">
     <link rel="icon" href="https://s.gravatar.com/avatar/8bc43bee9040db6434f0842501858358?s=80">
     <link rel="apple-touch-icon" href="https://s.gravatar.com/avatar/8bc43bee9040db6434f0842501858358?s=180">
 
@@ -46,22 +57,43 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Kostis Karampinas",
-      "jobTitle": "Senior Software Engineering Lead",
-      "worksFor": {
-        "@type": "Organization",
-        "name": "Skroutz"
-      },
-      "url": "https://kostiskarampinas.com",
-      "sameAs": [
-        "https://github.com/rpk0",
-        "https://x.com/rpk0_",
-        "https://linkedin.com/in/kostis-karampinas",
-        "https://rpk.io",
-        "https://www.instagram.com/rpk.io/"
-      ],
-      "knowsAbout": ["Software Engineering", "Engineering Leadership", "AI-assisted Software Engineering", "Cross-border E-commerce", "Film Photography"]
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://kostiskarampinas.com/#website",
+          "url": "https://kostiskarampinas.com/",
+          "name": "Kostis Karampinas",
+          "inLanguage": "en"
+        },
+        {
+          "@type": "ProfilePage",
+          "@id": "https://kostiskarampinas.com/#profile",
+          "url": "https://kostiskarampinas.com/",
+          "name": "Kostis Karampinas - Engineering Lead at Skroutz",
+          "isPartOf": { "@id": "https://kostiskarampinas.com/#website" },
+          "mainEntity": { "@id": "https://kostiskarampinas.com/#person" }
+        },
+        {
+          "@type": "Person",
+          "@id": "https://kostiskarampinas.com/#person",
+          "name": "Kostis Karampinas",
+          "url": "https://kostiskarampinas.com/",
+          "image": "https://s.gravatar.com/avatar/8bc43bee9040db6434f0842501858358?s=400",
+          "description": "Tech leader who still builds, artist at heart. Senior Software Engineering Lead at Skroutz, leading International across Cyprus, Romania and Bulgaria.",
+          "jobTitle": "Senior Software Engineering Lead",
+          "worksFor": { "@type": "Organization", "name": "Skroutz", "url": "https://www.skroutz.gr/" },
+          "homeLocation": { "@type": "Country", "name": "Greece" },
+          "sameAs": [
+            "https://github.com/rpk0",
+            "https://x.com/rpk0_",
+            "https://linkedin.com/in/kostis-karampinas",
+            "https://rpk.io",
+            "https://www.instagram.com/rpk.io/",
+            "https://monobloc.gr/"
+          ],
+          "knowsAbout": ["Software Engineering", "Engineering Leadership", "AI-assisted Software Engineering", "Cross-border E-commerce", "Ruby", "SEO", "Film Photography"]
+        }
+      ]
     }
     </script>
   </head>
@@ -96,6 +128,9 @@
           <p class="label" id="label" hidden></p>
           <div class="sugs" id="sugs" hidden></div>
         </section>
+        <noscript>
+          <p class="nojs">Senior Software Engineering Lead at Skroutz, leading the International team across Cyprus, Romania and Bulgaria. Thirteen years at Skroutz, half hands-on, half leading, with fully AI-driven development. Film photography on <a href="https://rpk.io/">rpk.io</a> and <a href="https://www.instagram.com/rpk.io/">Instagram</a>, furniture made by hand at <a href="https://monobloc.gr/">monobloc</a>. Find me on <a href="https://linkedin.com/in/kostis-karampinas">LinkedIn</a>, <a href="https://github.com/rpk0">GitHub</a> or <a href="https://x.com/rpk0_">X</a>.</p>
+        </noscript>
       </div>
     </main>
     <p class="sig">kostis karampinas – greece</p>
