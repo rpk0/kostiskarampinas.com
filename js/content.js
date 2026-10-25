@@ -28,6 +28,8 @@
     email,
 
     tagline: 'tech leader who still builds, artist at heart. i unblock teams and turn imagination into systems that scale.',
+    // Fixed line breaks: the tagline always sets in these four lines, sized to fit the column
+    breaks: ['builds,', 'unblock', 'imagination'],
     // Words that take turns sitting heavier, in this order
     groups: [['tech', 'leader'], ['still', 'builds,'], ['artist', 'at', 'heart.'], ['unblock'], ['imagination'], ['scale.']],
     rotateMs: 1200,

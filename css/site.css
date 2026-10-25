@@ -98,16 +98,17 @@ body { background: var(--bg); color: var(--fg); font-family: var(--font); -webki
   padding-right: max(1rem, env(safe-area-inset-right, 0rem));
   padding-block: clamp(6.5rem, 21vh, 13.75rem) 4.5rem;
 }
-.col { width: 100%; max-width: 73.75rem; display: flex; flex-direction: column; gap: clamp(2.5rem, 7vh, 4.5rem); min-width: 0; }
+.col { width: 100%; max-width: 73.75rem; display: flex; flex-direction: column; gap: clamp(2.5rem, 7vh, 4.5rem); min-width: 0; container-type: inline-size; }
 
 .tag {
   margin: 0;
-  font-size: clamp(2.375rem, 6.4vw, 5.875rem);
+  /* sized from the column, not the viewport: the longest line (10.4em) always fits, so the four lines never re-wrap */
+  font-size: min(5.875rem, 9.2cqi);
   line-height: 0.94;
   letter-spacing: -0.04em;
   word-spacing: var(--word-gap);
   font-weight: var(--rest);
-  text-wrap: balance;
+  white-space: nowrap;
 }
 .tag .w { display: inline-block; white-space: nowrap; }
 .tag .c { display: inline-block; text-align: center; }
