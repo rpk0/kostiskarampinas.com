@@ -170,7 +170,7 @@
 
   // ---------- Ask ----------
   let sugsOpen = false;
-  let mode = 'idle', cur = null, typer = null, sugKey = '', aiSeq = 0, aiAnswer = false, asks = 0;
+  let mode = 'idle', cur = null, typer = null, sugDelay = 0, rv = null, sugKey = '', aiSeq = 0, aiAnswer = false, asks = 0;
 
   // ---------- Instrument: scale, marker, knob, readout ----------
   const statusEl = document.getElementById('status');
@@ -299,37 +299,45 @@
     extraEl.hidden = false;
   }
 
-  // Keep the end of the answer in view while it's written out
-  function follow(smooth) {
-    const over = out.getBoundingClientRect().bottom + 24 - innerHeight;
-    if (over > 0) scrollBy({ top: over, behavior: smooth && !reduce ? 'smooth' : 'auto' });
+  // The whole answer is laid out at once, so the page never reflows; it scrolls into view once
+  function settle() {
+    const r = out.getBoundingClientRect();
+    const over = Math.min(r.bottom + 24 - innerHeight, r.top - 16);
+    if (over > 0) scrollBy({ top: over, behavior: reduce ? 'auto' : 'smooth' });
   }
+  // Words fade in one after another (CSS), the dot gliding along at the newest one
   function showAnswer(text, q, kind, item) {
-    clearInterval(typer);
-    const token = ++askToken;
+    clearTimeout(typer);
     askedEl.textContent = q;
-    renderExtra(null);
     out.classList.remove('reveal'); void out.offsetWidth; out.classList.add('reveal');
-    if (reduce) { answerEl.textContent = text; renderExtra(item); follow(); return; }
-    const body = text.replace(/\.\s*$/, '');
+    if (reduce) { answerEl.textContent = text; renderExtra(item); requestAnimationFrame(settle); return; }
+    const words = [];
+    out.hidden = false;
     answerEl.textContent = '';
-    busy = true; ask.classList.add('busy');
-    petDeliver().then(() => {
-      if (token !== askToken) return;
-      let n = 0;
-      typer = setInterval(() => {
-        n = Math.min(body.length, n + 2);
-        answerEl.textContent = body.slice(0, n);
-        follow();
-        if (n >= body.length) {
-          clearInterval(typer);
-          busy = false; ask.classList.remove('busy'); refreshStatus();
-          petReact(kind);
-          renderExtra(item);
-          follow(true);
-        }
-      }, 22);
+    text.replace(/\.\s*$/, '').split(/(\s+)/).forEach((part) => {
+      if (!part) return;
+      if (/^\s/.test(part)) { answerEl.append(part); return; }
+      const w = document.createElement('span');
+      w.className = 'w';
+      answerEl.append(w);
+      w.textContent = part;
+      words.push(w);
     });
+    const step = Math.min(34, 1500 / words.length), total = Math.round(step * (words.length - 1));
+    words.forEach((w, i) => w.style.setProperty('--i', Math.round(i * step) + 'ms'));
+    extraEl.style.setProperty('--d', total + 'ms');
+    renderExtra(item);
+    sugDelay = total + 250;
+    const last = words[words.length - 1].getClientRects();
+    rv = { words, step, t0: performance.now(), off: caret.getBoundingClientRect().top - last[last.length - 1].bottom };
+    busy = true; ask.classList.add('busy');
+    petDeliver();
+    requestAnimationFrame(settle);
+    typer = setTimeout(() => {
+      rv = null;
+      busy = false; ask.classList.remove('busy'); refreshStatus();
+      petReact(kind);
+    }, total + 250);
   }
   ['input', 'keyup', 'click', 'select', 'scroll'].forEach((ev) => input.addEventListener(ev, () => { track(); refreshStatus(); }));
   let sT;
@@ -341,6 +349,8 @@
     const key = sugs.map((s) => s.q || s).join(',') + '|' + lbl;
     if (key === sugKey) return;
     sugKey = key;
+    sugsEl.style.setProperty('--d', sugDelay + 'ms');
+    sugDelay = 0;
     sugsEl.textContent = '';
     sugs.forEach((s, i) => {
       const id = s.id || s;
@@ -374,7 +384,6 @@
   function askQ(text, forceId) {
     text = (text || '').trim();
     if (!text) { input.focus(); return; }
-    clearInterval(typer);
     const seq = ++aiSeq;
     aiAnswer = false;
     const egg = !forceId && EGGS.find((e) => e.re.test(text));
@@ -400,13 +409,13 @@
       live.textContent = SITE.limit;
       showAnswer(SITE.limit, text, 'no', QA.find((x) => x.id === 'hire'));
     } else if (!hit && AI_URL) {
-      busy = true; ask.classList.add('busy');
+      busy = true; ask.classList.add('busy'); P.think = true;
       fetch(AI_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ q: text }), signal: AbortSignal.timeout ? AbortSignal.timeout(9000) : undefined })
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => d && d.a, () => null)
         .then((a) => {
           if (seq !== aiSeq) return;
-          busy = false; ask.classList.remove('busy');
+          busy = false; ask.classList.remove('busy'); P.think = false;
           if (a) { mode = 'answer'; cur = null; aiAnswer = true; live.textContent = a; showAnswer(a, text, 'yes'); }
           else noMatch();
           sugKey = ''; refreshStatus(); render();
@@ -423,7 +432,6 @@
     track();
     refreshStatus();
     render();
-    setTimeout(() => { try { out.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' }); } catch (e) {} }, 80);
   }
   form.addEventListener('submit', (e) => { e.preventDefault(); askQ(input.value); });
   input.addEventListener('input', () => {
@@ -487,11 +495,10 @@
   zz.hidden = true;
   document.body.append(pet, zz);
 
-  let petAlive = false, petBusy = false, askToken = 0, dropP = null;
-  const P = { x: 0, y: 0, s: 12, mode: null, tw: null, fx: null, sleep: false };
+  let petAlive = false, petBusy = false, dropP = null, wantAnswer = false;
+  const P = { x: 0, y: 0, s: 12, mode: null, tw: null, fx: null, sleep: false, think: false };
   const EASE = { lin: (t) => t, in: (t) => t * t, out: (t) => 1 - (1 - t) * (1 - t) };
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-  const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
 
   function tween(x, y, dur, e, h) {
     return new Promise((res) => {
@@ -506,8 +513,14 @@
       return { x: r.left + scrollX + Math.max(P.s * 0.6, caretX()), y: r.top + scrollY - P.s / 2 };
     }
     if (m === 'answer') {
-      const r = caret.getBoundingClientRect();
-      return { x: r.left + scrollX + P.s * 0.75, y: r.top + scrollY - P.s / 2 - 1 };
+      const c = caret.getBoundingClientRect();
+      let x = c.left, y = c.top;
+      const i = rv ? Math.floor((performance.now() - rv.t0) / rv.step) : -1;
+      if (rv && i < rv.words.length - 1) {
+        const rs = rv.words[Math.max(0, i)].getClientRects(), w = rs[rs.length - 1];
+        if (w) { x = w.right; y = w.bottom + rv.off; }
+      }
+      return { x: x + scrollX + P.s * 0.75, y: y + scrollY - P.s / 2 - 1 };
     }
     return null;
   }
@@ -519,6 +532,7 @@
     petFx('squash', 220, 1);
   }
   async function travel(m) {
+    if (m === 'ruler') wantAnswer = false;
     petBusy = true; P.mode = null; P.sleep = false; zz.hidden = true;
     let a = anchorFor(m);
     if (a && Math.hypot(a.x - P.x, a.y - P.y) > 480) {
@@ -526,7 +540,7 @@
       a = anchorFor(m);
     }
     if (a) await hopTo(a);
-    P.mode = m; petBusy = false;
+    P.mode = wantAnswer ? 'answer' : m; petBusy = false;
   }
   function spawn() {
     if (petAlive) return;
@@ -568,11 +582,11 @@
       });
     }
   }
-  async function petDeliver() {
+  // No commute: it glides to the answer as it's written; a hop in flight lands there instead
+  function petDeliver() {
     if (!petAlive) spawn();
-    if (dropP) { await dropP; dropP = null; }
-    await nextFrame();
-    await travel('answer');
+    wantAnswer = true;
+    if (!petBusy) { P.mode = 'answer'; P.sleep = false; zz.hidden = true; }
   }
   function petReact(kind) {
     if (!petAlive) return;
@@ -593,13 +607,13 @@
         const a = anchorFor(P.mode);
         if (a) {
           const d = Math.hypot(a.x - P.x, a.y - P.y);
-          if (d > 70) { petBusy = true; hopTo(a).then(() => { petBusy = false; }); } // e.g. the answer wraps to a new line
-          else { const k = P.mode === 'answer' ? 0.5 : 0.28; P.x += (a.x - P.x) * k; P.y += (a.y - P.y) * k; }
+          if (d > 70 && P.mode === 'ruler') { petBusy = true; hopTo(a).then(() => { petBusy = false; }); } // e.g. the layout moved
+          else { const k = P.mode === 'answer' ? Math.min(0.2, P.s * 2.5 / (d || 1)) : 0.28; P.x += (a.x - P.x) * k; P.y += (a.y - P.y) * k; } // capped speed: a glide, never a leap
         }
       }
       if (!P.tw) {
         if (P.sleep) { sx *= 1.28; sy *= 0.62; }
-        else { const b = Math.sin(now / 620) * 0.045; sx *= 1 + b; sy *= 1 - b; } // breathing
+        else { const b = P.think ? Math.sin(now / 160) * 0.16 : Math.sin(now / 620) * 0.045; sx *= 1 + b; sy *= 1 - b; } // breathing, quicker while thinking
       }
       if (P.fx) {
         const f = P.fx, t = (now - f.t0) / f.dur;
