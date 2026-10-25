@@ -85,8 +85,8 @@
     ],
 
     // What the box says when a question runs past 50 characters
-    // The reply once a visit has used up its questions
-    limit: "That's ten questions for one visit. The rest are better over e-mail or LinkedIn.",
+    // The reply once a visit has used up its model questions
+    limit: "That's enough free-form questions for one visit. Pick one of these, or ask me the rest by e-mail or LinkedIn.",
 
     quips: [
       'easy there. 50 characters max. are you a bot?',

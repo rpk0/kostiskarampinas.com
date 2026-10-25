@@ -10,7 +10,7 @@
   const KEYS = SITE.keys;
   // The worker in worker/ answers questions nothing here matches; empty turns it off
   const AI_URL = 'https://kostiskarampinas-ask.kostis-rpk.workers.dev';
-  const MAX_ASKS = 10; // per page visit
+  const MAX_ASKS = 10; // model questions per page visit; curated answers are unlimited
   const RX = KEYS.map(([id, ks]) => [id, ks.map((k) => new RegExp('\\b' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'))]);
   const matchId = (t) => { for (const [id, rs] of RX) if (rs.some((r) => r.test(t))) return id; return null; };
 
@@ -366,7 +366,7 @@
         setSugs(path ? [...path.ids.filter((id) => id !== cur), path.exit] : SHOWN.filter((id) => id !== cur), 'Ask another');
       }
       else setSugs(SHOWN, '');
-      sugsEl.hidden = mode === 'limit';
+      sugsEl.hidden = false;
     }
     out.hidden = mode === 'idle';
     h1.parentElement.classList.toggle('has-answer', mode !== 'idle');
@@ -377,14 +377,6 @@
     clearInterval(typer);
     const seq = ++aiSeq;
     aiAnswer = false;
-    if (++asks > MAX_ASKS) {
-      input.value = ''; ask.classList.remove('has-text'); mode = 'limit'; cur = null;
-      live.textContent = SITE.limit;
-      showAnswer(SITE.limit, text, 'no', QA.find((x) => x.id === 'hire'));
-      if (touchUI) input.blur();
-      sugKey = ''; track(); refreshStatus(); render();
-      return;
-    }
     const egg = !forceId && EGGS.find((e) => e.re.test(text));
     if (egg) {
       input.value = ''; mode = 'answer'; cur = null;
@@ -403,7 +395,11 @@
       live.textContent = msg;
       showAnswer(msg, text, 'no');
     };
-    if (!hit && AI_URL) {
+    if (!hit && AI_URL && ++asks > MAX_ASKS) {
+      mode = 'limit'; cur = null;
+      live.textContent = SITE.limit;
+      showAnswer(SITE.limit, text, 'no', QA.find((x) => x.id === 'hire'));
+    } else if (!hit && AI_URL) {
       busy = true; ask.classList.add('busy');
       fetch(AI_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ q: text }), signal: AbortSignal.timeout ? AbortSignal.timeout(9000) : undefined })
         .then((r) => (r.ok ? r.json() : null))
