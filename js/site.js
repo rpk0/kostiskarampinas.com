@@ -55,7 +55,7 @@
       chars.push({ el: c, x: 0, y: 0, cur: 260, written: 260, g, e: 0, op: DIM, tint: 0, pk: 0 });
     }
     h1.appendChild(w);
-    if (wi < arr.length - 1) h1.appendChild(document.createTextNode(' '));
+    if (wi < arr.length - 1) h1.appendChild(SITE.breaks.includes(word) ? document.createElement('br') : document.createTextNode(' '));
   });
   const N = chars.length;
 
@@ -606,6 +606,7 @@
     }
     frames.push({ offset: 1, transform: pose(a.x, a.y, 1, 1) });
     P.x = a.x; P.y = a.y; P.anim = true;
+    pet.style.transform = pose(a.x, a.y, 1, 1); // already at the landing spot when the animation hands back, so no flash
     await pet.animate(frames, { duration: total }).finished.catch(() => {});
     P.anim = false;
     P.mode = wantAnswer || mode !== 'idle' ? 'answer' : 'ruler'; petBusy = false;
