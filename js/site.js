@@ -28,6 +28,8 @@
   const live = document.getElementById('live');
   const label = document.getElementById('label');
   const sugsEl = document.getElementById('sugs');
+  const escapeEl = document.getElementById('escape');
+  escapeEl.addEventListener('mousedown', (e) => e.preventDefault()); // keep focus, or the list (and this link) closes before the click lands
   const themeBtn = document.getElementById('theme');
 
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -349,7 +351,8 @@
     const key = sugs.map((s) => s.q || s).join(',') + '|' + lbl;
     if (key === sugKey) return;
     sugKey = key;
-    sugsEl.style.setProperty('--d', sugDelay + 'ms');
+    ask.style.setProperty('--d', sugDelay + 'ms'); // on the section, so the way out to /old waits for the list too
+    ask.style.setProperty('--n', sugs.length);
     sugDelay = 0;
     sugsEl.textContent = '';
     sugs.forEach((s, i) => {
@@ -378,6 +381,7 @@
       else setSugs(SHOWN, '');
       sugsEl.hidden = false;
     }
+    escapeEl.hidden = sugsEl.hidden;
     out.hidden = mode === 'idle';
     h1.parentElement.classList.toggle('has-answer', mode !== 'idle');
   }

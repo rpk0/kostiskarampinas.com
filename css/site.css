@@ -170,6 +170,12 @@ body { background: var(--bg); color: var(--fg); font-family: var(--font); -webki
   transition: color .2s;
 }
 .sugs button:hover, .sugs button:focus-visible { color: var(--fg); text-decoration: underline; text-underline-offset: 0.375rem; text-decoration-thickness: 1px; }
+/* the way back to the old vim page, after the questions */
+.escape {
+  align-self: flex-start; padding-block: 0.75rem; font-family: var(--mono); font-size: 0.8125rem; color: var(--muted); text-decoration: none;
+  animation: fadeup .5s cubic-bezier(.2,.7,0,1) both; animation-delay: calc(var(--d, 0ms) + (var(--n, 0) + 1) * 55ms);
+}
+.escape:hover, .escape:focus-visible { color: var(--fg); text-decoration: underline; text-underline-offset: 0.3rem; text-decoration-thickness: 1px; }
 
 .theme {
   position: absolute; z-index: 5;
@@ -205,6 +211,6 @@ button:focus-visible, a:focus-visible { outline: 1px solid var(--fg); outline-of
 @media (prefers-reduced-motion: reduce) {
   .theme, .tick, .mark { transition: none; }
   .extra li, .out.reveal .asked, .answer .w { animation: none; }
-  .sugs button { animation: none; }
+  .sugs button, .escape { animation: none; }
   .caret { animation: none; }
 }
