@@ -3,43 +3,52 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Kostis Karampinas - Engineering Lead</title>
     <meta name="author" content="Kostis Karampinas">
-    <meta name="description" content="Kostis Karampinas - Tech Lead at Skroutz. Software engineer, photographer, and film photography enthusiast based in Greece.">
-    <meta name="keywords" content="Kostis Karampinas, Tech Lead, Software Engineer, Film Photography, Skroutz, Greece">
-    <meta name="theme-color" content="#00303e">
-    
+    <!-- Beta: kept out of search until it replaces the homepage -->
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Kostis Karampinas: tech leader who still builds, artist at heart. Engineering Lead at Skroutz, leading International across Cyprus, Romania and Bulgaria. Film photography and monobloc on the side.">
+    <meta name="keywords" content="Kostis Karampinas, Engineering Lead, Tech Lead, Software Engineer, AI-first engineering, Cross-border e-commerce, Film Photography, Skroutz, Greece">
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0B0B0A">
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://kostiskarampinas.com/">
-    <meta property="og:title" content="Kostis Karampinas - Tech Lead & Software Engineer">
-    <meta property="og:description" content="Tech Lead at Skroutz. Software engineer and film photography enthusiast.">
+    <meta property="og:url" content="https://kostiskarampinas.com/new/">
+    <meta property="og:title" content="Kostis Karampinas - Engineering Lead">
+    <meta property="og:description" content="Tech leader who still builds, artist at heart. Ask me anything.">
     <meta property="og:image" content="https://s.gravatar.com/avatar/8bc43bee9040db6434f0842501858358?s=400">
     <meta property="og:site_name" content="Kostis Karampinas">
-    
+
     <!-- Twitter -->
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:url" content="https://kostiskarampinas.com/">
-    <meta name="twitter:title" content="Kostis Karampinas - Tech Lead & Software Engineer">
-    <meta name="twitter:description" content="Tech Lead at Skroutz. Software engineer and film photography enthusiast.">
+    <meta name="twitter:url" content="https://kostiskarampinas.com/new/">
+    <meta name="twitter:title" content="Kostis Karampinas - Engineering Lead">
+    <meta name="twitter:description" content="Tech leader who still builds, artist at heart. Ask me anything.">
     <meta name="twitter:image" content="https://s.gravatar.com/avatar/8bc43bee9040db6434f0842501858358?s=400">
     <meta name="twitter:creator" content="@rpk0_">
-    
-    <title>Kostis Karampinas - Tech Lead & Software Engineer</title>
-    <link rel="canonical" href="https://kostiskarampinas.com/">
+
+    <link rel="canonical" href="https://kostiskarampinas.com/new/">
     <link rel="icon" href="https://s.gravatar.com/avatar/8bc43bee9040db6434f0842501858358?s=80">
     <link rel="apple-touch-icon" href="https://s.gravatar.com/avatar/8bc43bee9040db6434f0842501858358?s=180">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css">
-    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@100..900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="css/site.css">
+
+    <!-- Apply a saved light/dark choice before first paint, so the page never flashes the wrong theme -->
+    <script>
+      try { const t = localStorage.getItem('theme'); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch (e) {}
+    </script>
+
     <!-- Structured Data -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Person",
       "name": "Kostis Karampinas",
-      "jobTitle": "Tech Lead",
+      "jobTitle": "Senior Software Engineering Lead",
       "worksFor": {
         "@type": "Organization",
         "name": "Skroutz"
@@ -52,40 +61,46 @@
         "https://rpk.io",
         "https://www.instagram.com/rpk.io/"
       ],
-      "knowsAbout": ["Software Engineering", "Film Photography", "Tech Leadership"]
+      "knowsAbout": ["Software Engineering", "Engineering Leadership", "AI-assisted Software Engineering", "Cross-border E-commerce", "Film Photography"]
     }
     </script>
   </head>
   <body>
-    <div class="terminal-window">
-      <div class="terminal-header">
-        <div class="terminal-buttons">
-          <span class="terminal-button close"></span>
-          <span class="terminal-button minimize"></span>
-          <span class="terminal-button maximize"></span>
-        </div>
-        <div class="terminal-title">kostis@karampinas ~ vim me.rb</div>
+    <button class="theme" id="theme" type="button" aria-label="Switch to dark mode">
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+    </button>
+
+    <main class="page">
+      <div class="col">
+        <h1 class="tag" id="tag">tech leader who still builds, artist at heart. i unblock teams and turn imagination into systems that scale.</h1>
+
+        <section class="ask" id="ask" aria-label="Ask me a question">
+          <div class="instrument">
+            <div class="readout" aria-hidden="true"><span class="led"></span><span id="status">ready</span><span class="count" id="count">00/50</span></div>
+            <form class="field" id="form" autocomplete="off">
+              <div class="track">
+                <label class="sr" for="q">Ask me anything</label>
+                <input id="q" name="q" type="text" placeholder="Ask me anything" enterkeyhint="send" autocomplete="off">
+                <div class="scale" id="scale" aria-hidden="true"><span class="mark" id="mark"></span></div>
+              </div>
+            </form>
+            <p class="err" id="err" role="status" hidden></p>
+          </div>
+          <div class="out" id="out" hidden>
+            <p class="asked" id="asked"></p>
+            <p class="answer"><span id="answer"></span><span class="caret" id="caret" aria-hidden="true"></span></p>
+            <div class="extra" id="extra" hidden></div>
+          </div>
+          <p class="sr" id="live" aria-live="polite"></p>
+          <p class="label" id="label" hidden></p>
+          <div class="sugs" id="sugs" hidden></div>
+        </section>
       </div>
-      <main class="terminal-content">
-        <pre><code class="language-ruby"><span class="line"><span class="def">Me</span>.<span class="def_name">new</span>(</span><span class="line indent"><span class="hash_key">name:</span> <span class="string">"Kostis"</span>,</span><span class="line indent"><span class="hash_key">job:</span> <span class="def">Job</span>.<span class="def_name">new</span>(</span><span class="line indent-2"><span class="hash_key">title:</span> <span class="string">"Tech Lead"</span>,</span><span class="line indent-2"><span class="hash_key">company:</span> <a href="https://www.skroutz.gr/" rel="noopener" target="_blank">skroutz.gr</a></span><span class="line indent">),</span><span class="line indent"><span class="hash_key">hobbies:</span> {</span><span class="line indent-2"><span class="hash_key">film_photography:</span> [</span><span class="line indent-3"><a href="https://rpk.io/" rel="noopener" target="_blank">photography blog</a>,</span><span class="line indent-3"><a href="https://www.instagram.com/rpk.io/" rel="noopener" target="_blank">instagram</a></span><span class="line indent-2">]</span><span class="line indent">},</span><span class="line indent"><span class="hash_key">social:</span> {</span><span class="line indent-2"><span class="hash_key">x:</span> <a href="https://x.com/rpk0_" rel="noopener" target="_blank">rpk0_</a>,</span><span class="line indent-2"><span class="hash_key">linkedin:</span> <a href="https://linkedin.com/in/kostis-karampinas" rel="noopener" target="_blank">kostis-karampinas</a>,</span><span class="line indent-2"><span class="hash_key">github:</span> <a href="https://github.com/rpk0/" rel="noopener" target="_blank">rpk0</a></span><span class="line indent">}</span><span class="line">)</span><span class="line empty">&nbsp;</span><span class="line"><span class="def">def</span> <span class="def_name">contact</span></span><span class="line indent"><span class="s2">%w(</span><a href="#" id="email-link" title="Click to reveal e-mail address" rel="noopener">e-mail</a> <a href="https://www.linkedin.com/messaging/compose/?recipient=kostis-karampinas-8029044b" rel="noopener" target="_blank">linkedin</a><span class="s2">)</span></span><span class="line"><span class="def">end</span><span class="cursor"></span></span></code></pre>
-        <script>
-          // Anti-spam email obfuscation
-          (function() {
-            const u = 'kostis.karampinas';
-            const d = 'gmail.com';
-            const link = document.getElementById('email-link');
-            link.href = 'mailto:' + u + String.fromCharCode(64) + d;
-            link.onclick = function(e) {
-              e.preventDefault();
-              window.location.href = this.href;
-            };
-          })();
-        </script>
-      </main>
-      <div class="terminal-footer">
-        <span class="footer-mode">-- INSERT --</span>
-        <span class="footer-info">me.rb [+] 22L, 248C</span>
-      </div>
-    </div>
+    </main>
+    <p class="sig">kostis karampinas – greece</p>
+
+    <script src="js/content.js"></script>
+    <script src="js/site.js"></script>
   </body>
 </html>

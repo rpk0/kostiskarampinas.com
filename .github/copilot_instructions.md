@@ -1,34 +1,28 @@
 # Copilot Instructions for `kostiskarampinas.com`
 
 ## Project Overview
-- Personal portfolio website with a code editor aesthetic.
-- Static site using modern HTML5 and CSS3.
-- Deployed via GitHub Pages.
-- Mobile-first responsive design maintaining code block feeling.
+- Personal site, static HTML/CSS/JS, deployed via GitHub Pages; `CNAME` holds the domain.
+- `/` is the "ask me" homepage: one lowercase tagline and one input; answers carry the CV and links.
+- `/old/` is the previous vim-style page, kept `noindex, nofollow`.
 
-## Content & Structure
-- Root contains `index.html` as the main entry point.
-- Modern CSS with CSS custom properties in `css/main.css`.
-- Uses Fira Code monospace font for authentic code editor look.
-- Configuration file: `CNAME` for custom domain (kostiskarampinas.com).
-- The site simulates a vim editor displaying a Ruby code file (`me.rb`).
-- Footer displays vim-style stats: `me.rb [+] XL, YC` where X=lines, Y=characters.
-- When updating content, remember to update the footer stats to match actual line/char count.
-
-## Beta homepage (`/new/`)
-- A different design: one lowercase tagline and one input; answers carry the CV and links.
-- All copy lives in `new/js/content.js`; `new/js/site.js` is behaviour only.
-- The page is `noindex, nofollow` until it replaces the root page.
+## Homepage (`/`)
+- All copy lives in `js/content.js`; `js/site.js` is behaviour only; styles in `css/site.css`.
 - Sizes are in `rem`: 16px up to 1920px wide, scaling up on larger screens.
 - Unmatched questions go to the Cloudflare Worker in `worker/` (Workers AI). It is grounded
-  only on `new/js/content.js`; redeploy it with `cd worker && npx wrangler deploy` after
+  only on `js/content.js`; redeploy it with `cd worker && npx wrangler deploy` after
   editing that file.
 - Never put internal or unannounced company details in `content.js`: it is public and is
   the model's only knowledge.
+- Keep the `<noscript>` bio, the JSON-LD and the meta descriptions in line with `content.js`.
+- `og.png` (1200x630) is the share image; regenerate it if the tagline changes.
+
+## Old page (`/old/`)
+- Simulates vim showing a Ruby file (`me.rb`), styled by `old/css/main.css` with Fira Code.
+- Footer displays vim-style stats: `me.rb [+] XL, YC` where X=lines, Y=characters.
+  Update them when the content changes.
 
 ## Development Guidelines
 - Keep changes minimal and focused.
-- Maintain the code editor aesthetic across all screen sizes.
 - Use semantic HTML5 elements (`main`, `nav`, etc.).
 - Leverage CSS custom properties for theming consistency.
 - Ensure mobile-first responsive design with proper touch targets.
@@ -36,7 +30,7 @@
 - Add comments only when clarity is necessary.
 - Do not commit local scratch files or temporary build artifacts.
 
-## HTML Structure & Syntax
+## Old page HTML Structure & Syntax
 - Content is structured as a Ruby code snippet wrapped in HTML/CSS for styling.
 - Each line of Ruby code is wrapped in `<span class="line">` with appropriate indent classes.
 - Indentation uses classes: `indent`, `indent-2`, `indent-3` for visual hierarchy.
@@ -46,10 +40,9 @@
 - The cursor is represented by `<span class="cursor"></span>` at the end of content.
 
 ## SEO & Metadata
-- Rich meta tags implemented: Open Graph, Twitter Cards, structured data (JSON-LD).
-- Uses Gravatar for profile images across social platforms.
-- Canonical URL and proper meta descriptions are essential.
-- Schema.org Person markup includes job, organization, and social profiles.
+- Only `/` is indexed: canonical, Open Graph, Twitter card, and JSON-LD (`ProfilePage`,
+  `Person`, `WebSite`). It is the only URL in `sitemap.xml`.
+- `/old/` is `noindex, nofollow`. Don't block it in `robots.txt`, or crawlers can't see that.
 
 ## Communication Tips for Agents
 - Propose design options rather than making unilateral decisions when unsure.

@@ -1,4 +1,4 @@
-import content from '../new/js/content.js';
+import content from '../js/content.js';
 
 // Free on the Workers AI daily allocation; past it, calls fail and the page shows its curated fallback
 const MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
