@@ -12,6 +12,8 @@ Personal site: one tagline, one input, ask me anything.
   - `js/site.js` is behaviour only
 - `/old/` the previous vim-style page, kept `noindex, nofollow`
 - `robots.txt`, `sitemap.xml` and `og.png` (the share image) for search and social
+- Everything is self-hosted: `fonts/` (latin and latin-ext woff2), the dot favicons,
+  and `profile.png` (the photo with the dot)
 - `worker/` answers questions no curated answer matches, using Workers AI and
   `js/content.js` as its only knowledge
 

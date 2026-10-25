@@ -15,6 +15,9 @@
   the model's only knowledge.
 - Keep the `<noscript>` bio, the JSON-LD and the meta descriptions in line with `content.js`.
 - `og.png` (1200x630) is the share image; regenerate it if the tagline changes.
+- No third-party assets: fonts live in `fonts/` (declared at the top of each stylesheet),
+  icons are the magenta dot (`favicon.svg`, `favicon-48.png`, `favicon.ico`,
+  `apple-touch-icon.png`), and `profile.png` is the photo with the dot.
 
 ## Old page (`/old/`)
 - Simulates vim showing a Ruby file (`me.rb`), styled by `old/css/main.css` with Fira Code.
