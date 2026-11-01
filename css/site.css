@@ -198,7 +198,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--font); -webki
 .out .answer { margin: 0; font-size: clamp(1.625rem, 3.1vw, 2.625rem); line-height: 1.16; font-weight: 420; letter-spacing: -0.03em; max-width: 24em; text-wrap: pretty; }
 /* an invisible marker at the end of the answer, sitting on the baseline: the dot rides it and becomes the full stop */
 .caret { display: inline-block; width: 0; height: 0; }
-.answer .w { animation: wordin .45s ease-out both; animation-delay: var(--i); }
+.answer .w { animation: wordin .45s ease-out backwards; animation-delay: var(--i); }
 @keyframes wordin { from { opacity: 0; filter: blur(0.08em); } }
 
 /* ---- the dot: the page's pet ---- */
