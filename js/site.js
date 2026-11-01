@@ -213,14 +213,14 @@
     }
     track();
   }
-  function caretX() {
+  function textX(s) {
     const cs = getComputedStyle(input);
     ctx.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
     if ('letterSpacing' in ctx) ctx.letterSpacing = cs.letterSpacing;
-    const pos = input.selectionStart == null ? input.value.length : input.selectionStart;
-    const w = ctx.measureText(input.value.slice(0, pos)).width - input.scrollLeft;
+    const w = ctx.measureText(s).width - input.scrollLeft;
     return Math.max(0, Math.min(scaleEl.clientWidth, w));
   }
+  const caretX = () => textX(input.value.slice(0, input.selectionStart == null ? input.value.length : input.selectionStart));
   function track() {
     if (input.value.length > MAX) {
       const p = Math.min(MAX, input.selectionStart == null ? MAX : input.selectionStart);
@@ -449,6 +449,7 @@
   input.addEventListener('keydown', (e) => { if (e.key === 'Escape') input.blur(); });
   ask.addEventListener('focusin', () => {
     if (!ask.classList.contains('is-focus')) { ask.classList.add('is-focus'); if (document.activeElement === input) wave(); render(); refreshStatus(); }
+    if (!petAlive && !reduce) dropP = drop(); // focused before it fell on its own: it comes over now
   });
   ask.addEventListener('focusout', (e) => {
     if (!ask.contains(e.relatedTarget)) { ask.classList.remove('is-focus'); render(); refreshStatus(); }
@@ -516,9 +517,12 @@
   }
   function petFx(kind, dur, p) { P.fx = { kind, t0: performance.now(), dur, p: p == null ? 1 : p }; }
   function anchorFor(m) {
+    // The full stop of whatever is in the input, or of the placeholder while it is empty
     if (m === 'ruler') {
-      const r = scaleEl.getBoundingClientRect();
-      return { x: r.left + scrollX + Math.max(P.s * 0.6, caretX()), y: r.top + scrollY - P.s / 2 };
+      const r = input.getBoundingClientRect();
+      const x = textX(input.value || input.placeholder);
+      const fm = ctx.measureText('x'), base = r.top + (r.height + ((fm.fontBoundingBoxAscent - fm.fontBoundingBoxDescent) || 0)) / 2;
+      return { x: r.left + scrollX + x + P.s * 0.75, y: base + scrollY - P.s / 2 - 1 };
     }
     if (m === 'answer') {
       const c = caret.getBoundingClientRect();
@@ -681,7 +685,7 @@
     clearTimeout(autoT);
     autoT = setTimeout(() => {
       if (document.hidden) { document.addEventListener('visibilitychange', armDrop, { once: true }); return; }
-      if (petAlive || reduce || ask.classList.contains('is-focus')) return;
+      if (petAlive || reduce) return;
       dropP = drop();
     }, READ_MS);
   };
